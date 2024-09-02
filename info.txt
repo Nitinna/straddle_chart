@@ -1,0 +1,5 @@
+# activate virtual env directly from cmd use this
+
+"C:\Users\Nitin\Desktop\straddle chart\iv_chart\Scripts\activate"
+
+cd "C:\Users\Nitin\Desktop\chart"
