@@ -6,9 +6,13 @@ import plotly.graph_objects as go
 import pickle
 
 # Load data
-file_name = open('iv_chart', 'rb')
-df = pickle.load(file_name)
-df['datetime'] = pd.to_datetime(df['datetime'])
+def load_data():
+    with open('iv_chart', 'rb') as file:
+        df = pickle.load(file)
+    df['datetime'] = pd.to_datetime(df['datetime'])
+    return df
+
+df = load_data()
 
 app = dash.Dash(__name__)
 
@@ -26,12 +30,7 @@ app.layout = html.Div([
     Input('interval-component', 'n_intervals')
 )
 def update_chart(n):
-    global df
-
-    # Reload data
-    file_name = open('iv_chart', 'rb')
-    df = pickle.load(file_name)
-    df['datetime'] = pd.to_datetime(df['datetime'])
+    df = load_data()
 
     # Create candlestick chart
     fig = go.Figure(data=[go.Candlestick(
@@ -42,24 +41,20 @@ def update_chart(n):
         close=df['close']
     )])
 
-    # Get the latest price
-    latest_price = df.iloc[-1]['close']
-    latest_datetime = df.iloc[-1]['datetime']
-
-
-    # Add a text annotation for the latest price
+    # Add latest price annotation
+    latest = df.iloc[-1]
     fig.add_trace(go.Scatter(
-        x=[latest_datetime],
-        y=[latest_price],
+        x=[latest['datetime']],
+        y=[latest['close']],
         mode='markers+text',
         marker=dict(color='black', size=1),
-        text=[f': {latest_price:.2f}'],
+        text=[f'{latest["close"]:.2f}'],
         textposition='top right',
         name='PRICE'
     ))
 
     fig.update_layout(
-        title='Candlestick Chart',
+        title='STRADDLE_CHART',
         xaxis_title='Datetime',
         yaxis_title='Price',
         autosize=True,
