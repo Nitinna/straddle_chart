@@ -1,6 +1,6 @@
 import dash
 from dash import dcc, html
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
 import pandas as pd
 import plotly.graph_objects as go
 import pickle
@@ -27,9 +27,10 @@ app.layout = html.Div([
 
 @app.callback(
     Output('candlestick-chart', 'figure'),
-    Input('interval-component', 'n_intervals')
+    Input('interval-component', 'n_intervals'),
+    State('candlestick-chart', 'relayoutData')  # Capture current xaxis range
 )
-def update_chart(n):
+def update_chart(n, relayoutData):
     df = load_data()
 
     # Create candlestick chart
@@ -53,13 +54,19 @@ def update_chart(n):
         name='PRICE'
     ))
 
+    # Update layout with scrollable x-axis and preserve x-axis range
     fig.update_layout(
         title='STRADDLE_CHART',
         xaxis_title='Datetime',
         yaxis_title='Price',
         autosize=True,
         height=1080,
-        width=1920
+        width=1920,
+        xaxis=dict(
+            rangeslider=dict(visible=True),  # Enable scroll bar
+            showspikes=True,  # Optional: Adds vertical spikes to show where the cursor is over the graph
+            range=relayoutData.get('xaxis.range', None)  # Restore x-axis range
+        )
     )
 
     return fig
